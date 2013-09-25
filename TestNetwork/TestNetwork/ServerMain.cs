@@ -6,6 +6,7 @@ using System.Threading;
 using System.IO;
 using Chat = System.Net;
 using System.Net;
+using Play;
 
 namespace TestNetwork
 {
@@ -34,6 +35,7 @@ namespace TestNetwork
                 {
                     Chat.Sockets.TcpClient connection = server.AcceptTcpClient();
                     Console.WriteLine("You have connected");
+                    Player play = new Player(connection);
                 }
             }
         }
@@ -57,7 +59,7 @@ namespace TestNetwork
                         writer = null;
                     }
                 }
-                catch (Exception e44)
+                catch (Exception e)
                 {
                     string str = (string)ServerMain.userNameByConnect[tcpClient[i]];
                     ServerMain.SystemMessage("*** " + str + " *** Has Disconnected");
@@ -72,7 +74,6 @@ namespace TestNetwork
         {
             StreamWriter writer;
             ArrayList ToRemove = new ArrayList(0);
-
             Chat.Sockets.TcpClient[] tcpClient = new Chat.Sockets.TcpClient[ServerMain.userName.Count];
             ServerMain.userName.Values.CopyTo(tcpClient, 0);
 
@@ -85,13 +86,15 @@ namespace TestNetwork
                     writer.Flush();
                     writer = null;
                 }
-                catch(Exception e44){
+                //throws exception if user disconnects
+                ///user disconnects the removes from list of users
+                catch(Exception e){
                     ServerMain.userName.Remove(ServerMain.userNameByConnect[tcpClient[i]]);
                     ServerMain.userNameByConnect.Remove(tcpClient[i]);
                 }
             }
         }
-        public static void BroadcastCharMove(Player* player)
+   /*     public static void BroadcastCharMove(Player player)
         {
             Chat.Sockets.TcpClient[] tcpClient = new Chat.Sockets.TcpClient[ServerMain.userName.Count];
             ServerMain.userName.Values.CopyTo(tcpClient, 0);
@@ -102,13 +105,12 @@ namespace TestNetwork
                 {
                   //push packets to each connected user on the server
                 }
-                catch (Exception e44)
+                catch (Exception e)
                 {
                     ServerMain.userName.Remove(ServerMain.userNameByConnect[tcpClient[i]]);
                     ServerMain.userNameByConnect.Remove(tcpClient[i]);
-                    continue;
                 }
             }
-        }
+        }*/
     }
 }
