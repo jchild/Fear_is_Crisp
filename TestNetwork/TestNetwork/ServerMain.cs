@@ -6,6 +6,7 @@ using System.Threading;
 using System.IO;
 using Chat = System.Net;
 using System.Net;
+using System.Net.Sockets;
 using Play;
 
 namespace TestNetwork
@@ -20,11 +21,27 @@ namespace TestNetwork
         {
             ServerMain server = new ServerMain();
         }
+
+        //gets local IP address of host
+        public IPAddress LocalIPAddress()
+        {
+            IPHostEntry host;
+            host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (IPAddress ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip;
+                }
+            }
+            return null;
+        }
+
         public ServerMain()
         {
             userName = new Hashtable(100);
             userNameByConnect = new Hashtable(100);
-            IPAddress serverIP = null;//need to find a way to change thig to server address
+            IPAddress serverIP = LocalIPAddress();
             server = new System.Net.Sockets.TcpListener(serverIP, 800);
 
             while (true)
@@ -39,6 +56,7 @@ namespace TestNetwork
                 }
             }
         }
+
         //this broadcasts messages to all in server from a specific user
         public static void BroadcastChatMsg(string usrNm, string mesg)
         {
@@ -69,6 +87,7 @@ namespace TestNetwork
             }
 
         }
+        
         //this is system messages
         public static void SystemMessage(string msg)
         {
@@ -94,7 +113,8 @@ namespace TestNetwork
                 }
             }
         }
-   /*     public static void BroadcastCharMove(Player player)
+  
+        /*     public static void BroadcastCharMove(Player player)
         {
             Chat.Sockets.TcpClient[] tcpClient = new Chat.Sockets.TcpClient[ServerMain.userName.Count];
             ServerMain.userName.Values.CopyTo(tcpClient, 0);

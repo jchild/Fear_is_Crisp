@@ -15,9 +15,9 @@ namespace Play
         System.IO.StreamWriter writer;
         string UserName;
 
-        public Player(System.Net.Sockets.TcpClient tcpClient)
+        public Player(System.Net.Sockets.TcpClient TcpClient)
         {
-            client = tcpClient;
+            client = TcpClient;
             Thread chatTread = new Thread(new ThreadStart(login));
             chatTread.Start();
         }
