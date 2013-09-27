@@ -1,0 +1,6 @@
+C:\Users\Jonathan\Documents\Projects\TestNetwork\TestNetwork\bin\Debug\TestNetwork.exe.config
+C:\Users\Jonathan\Documents\Projects\TestNetwork\TestNetwork\bin\Debug\TestNetwork.exe
+C:\Users\Jonathan\Documents\Projects\TestNetwork\TestNetwork\bin\Debug\TestNetwork.pdb
+C:\Users\Jonathan\Documents\Projects\TestNetwork\TestNetwork\obj\Debug\Server.csprojResolveAssemblyReference.cache
+C:\Users\Jonathan\Documents\Projects\TestNetwork\TestNetwork\obj\Debug\TestNetwork.exe
+C:\Users\Jonathan\Documents\Projects\TestNetwork\TestNetwork\obj\Debug\TestNetwork.pdb

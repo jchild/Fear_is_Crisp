@@ -43,18 +43,20 @@ namespace TestNetwork
             userNameByConnect = new Hashtable(100);
             IPAddress serverIP = LocalIPAddress();
             server = new System.Net.Sockets.TcpListener(serverIP, 800);
-
+            Console.WriteLine("Server Start....");
+            Console.WriteLine("Server IP: " + serverIP.ToString());
             while (true)
             {
                 server.Start();
-
                 if (server.Pending())
                 {
                     Chat.Sockets.TcpClient connection = server.AcceptTcpClient();
                     Console.WriteLine("You have connected");
                     Player play = new Player(connection);
                 }
+
             }
+            
         }
 
         //this broadcasts messages to all in server from a specific user
@@ -108,29 +110,41 @@ namespace TestNetwork
                 //throws exception if user disconnects
                 ///user disconnects the removes from list of users
                 catch(Exception e){
+                    Console.WriteLine("User " + ServerMain.userName[tcpClient[i]] + " has disconnected.");
                     ServerMain.userName.Remove(ServerMain.userNameByConnect[tcpClient[i]]);
                     ServerMain.userNameByConnect.Remove(tcpClient[i]);
                 }
             }
         }
-  
-        /*     public static void BroadcastCharMove(Player player)
+
+        //Gets in the Players location, and broadcasts out to all players     
+        public static void BroadcastCharMove(String player)
         {
+            StreamWriter send;
+            ArrayList ToRemove = new ArrayList(0);
             Chat.Sockets.TcpClient[] tcpClient = new Chat.Sockets.TcpClient[ServerMain.userName.Count];
             ServerMain.userName.Values.CopyTo(tcpClient, 0);
-            
+
             for (int i = 0; i < tcpClient.Length; i++)
-            { 
+            {
                 try
                 {
-                  //push packets to each connected user on the server
+                    if (player.Trim() == "" || tcpClient[i] == null)
+                    {
+                        send = new StreamWriter(tcpClient[i].GetStream());
+                        send.WriteLine(player);
+                        send.Flush();
+                        send = null;
+                    }
                 }
                 catch (Exception e)
                 {
-                    ServerMain.userName.Remove(ServerMain.userNameByConnect[tcpClient[i]]);
+                    string str = (string)ServerMain.userNameByConnect[tcpClient[i]];
+                    ServerMain.SystemMessage("*** " + str + " *** Has Disconnected");
+                    ServerMain.userName.Remove(str);
                     ServerMain.userNameByConnect.Remove(tcpClient[i]);
                 }
             }
-        }*/
+        }
     }
 }
