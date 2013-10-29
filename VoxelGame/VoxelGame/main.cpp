@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "Block.h"
+//#include "Block.h"
 #include "Camera.h"
 
 #ifdef __APPLE__
@@ -16,7 +16,7 @@ float red = 1.0f, green = 0.0f, blue = 0.0f;
 GLuint vboId= 0;
 GLfloat* vertices;
 
-
+const int DESIRED_FPS = 60;
 //DisplayStatistics displayUtil;
 
 // MENU DEFINITION
@@ -55,7 +55,7 @@ void *font = GLUT_BITMAP_TIMES_ROMAN_24;
 int width = 1024, height = 768;
 
 float blockSize = 0.25f;
-Block* m_pBlocks[32][32][32];
+//Block* m_pBlocks[32][32][32];
 
 /*TEST*/
 Camera camera;
@@ -124,7 +124,6 @@ void renderCube()
 		glEnd();
 	glPopMatrix();
 }
-
 
 void renderCubes()
 {
@@ -308,21 +307,8 @@ void createPopupMenus(){
 }
 
 void renderScene(void){
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 	camera.UpdateCamera();
-		/*
-		if(deltaMove)
-			computePos(deltaMove);
-		if(deltaAngle)
-			computeDir(deltaAngle);
-
-		glLoadIdentity();
-		//Set Camera
-		gluLookAt(x, 1.0f, z,
-				  x + lx, 1.0f, z + lz,
-				  0.0f, 1.0f, 0.0f);	
-		*/
 
 	//Draw Ground
 	glColor3f(0.5f, 0.5f, 0.5f);
@@ -333,60 +319,10 @@ void renderScene(void){
 		glVertex3f(100.f, 0.0f, -100.0f);
 	glEnd();
 
-	/*
-	char number[3];
-	for(int i = -3; i < 3; i++){
-		for(int j = -3; j < 3; j++){
-			glPushMatrix();
-			glTranslatef(i * 10.0f, 0, j * 10.0f);
-			drawSnowMan();
-			sprintf(number, "%d", (i+3)*6 + (j+3));
-			renderBitmapString(0.0f, 0.5f, 0.0f, (void *)font, number);
-
-			glPopMatrix();
-		}
-	}
-	*/
-
 	renderCubes();
-
-	/*
-	camera.changeProjection(false);
-
-	glColor3f(0.0f, 1.0f, 1.0f);
-
-	glPushMatrix();
-	glLoadIdentity();
-	renderSpacedBitmapString(5, 30, 5, GLUT_BITMAP_HELVETICA_18, displayUtil.get_Frames());	
-	glPopMatrix();	
-	
-	camera.changeProjection(true);	
-	*/
 
 	glutSwapBuffers();
 }
-
-/*
-void init(){
-	// register callbacks
-	glutDisplayFunc(renderScene);
-	glutReshapeFunc(changeSize);
-	glutIdleFunc(renderScene);
-
-	glutIgnoreKeyRepeat(1);
-	glutKeyboardFunc(processNormalKeys);
-	glutSpecialFunc(pressKey);
-	glutSpecialUpFunc(releaseKey);
-	glutMouseFunc(mouseButton);
-	glutMotionFunc(mouseMove);
-
-	// OpenGL init
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);	
-	displayUtil = DisplayStatistics();
-	
-}
-*/
 
 void changeSize(int w, int h)
 {
@@ -448,7 +384,7 @@ int main(int argc, char **argv) {
 
 	//init Menus
 	createPopupMenus();
-
+	
 	// enter GLUT event processing cycle
 	glutMainLoop();
 	
