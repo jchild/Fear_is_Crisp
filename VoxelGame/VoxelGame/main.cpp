@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-//#include "Block.h"
 #include "Camera.h"
+#include "Block.h"
+
 
 #ifdef __APPLE__
 #include <GLUT/freeglut.h>
@@ -10,7 +11,6 @@
 #include <GL/freeglut.h>
 #endif
 
-float red = 1.0f, green = 0.0f, blue = 0.0f;
 
 //Vertex-Buffer Object
 GLuint vboId= 0;
@@ -54,94 +54,12 @@ void *font = GLUT_BITMAP_TIMES_ROMAN_24;
 //Orthographics
 int width = 1024, height = 768;
 
-float blockSize = 0.25f;
-//Block* m_pBlocks[32][32][32];
 
 /*TEST*/
 Camera camera;
+Block block;
 
-void drawSnowMan(){
-	glScalef(scale, scale, scale);
-	glColor3f(1.0f, 1.0f, 1.0f);
 
-	//Draw Body
-	glTranslatef(0.0f, 0.75f, 0.0f);
-	glutSolidSphere(0.75f, 20, 20);
-
-	//Draw Head
-	glTranslatef(0.0f, 1.0f, 0.0f);
-	glutSolidSphere(0.25f, 20, 20);
-
-	//Draw Eyes
-	glPushMatrix();
-	glColor3f(0.0f, 0.0f, 0.0f);
-	glTranslatef(0.05f, 0.10f, 0.18f);
-	glutSolidSphere(0.05f, 10, 10);
-	glTranslatef(-0.1f, 0.0f, 0.0f);
-	glutSolidSphere(0.05f, 10, 10);
-	glPopMatrix();
-
-	//Draw Nose
-	glColor3f(red, green, blue);
-	glRotatef(0.0f, 1.0f, 0.0f, 0.0f);
-	glutSolidCone(0.08f, 0.5f, 10, 2);
-}
-
-void renderCube()
-{	
-	glPushMatrix();
-		glBegin(GL_QUADS);
-			glColor3f(red, green, blue);
-			glVertex3f( blockSize, blockSize,-blockSize);          // Top Right Of The Quad (Top)
-			glVertex3f(-blockSize, blockSize,-blockSize);          // Top Left Of The Quad (Top)
-			glVertex3f(-blockSize, blockSize, blockSize);          // Bottom Left Of The Quad (Top)
-			glVertex3f( blockSize, blockSize, blockSize);          // Bottom Right Of The Quad (Top)
-
-			glVertex3f( blockSize,-blockSize, blockSize);          // Top Right Of The Quad (Bottom)
-			glVertex3f(-blockSize,-blockSize, blockSize);          // Top Left Of The Quad (Bottom)
-			glVertex3f(-blockSize,-blockSize,-blockSize);          // Bottom Left Of The Quad (Bottom)
-			glVertex3f( blockSize,-blockSize,-blockSize);          // Bottom Right Of The Quad (Bottom)
-
-			glVertex3f( blockSize, blockSize, blockSize);          // Top Right Of The Quad (Front)
-			glVertex3f(-blockSize, blockSize, blockSize);          // Top Left Of The Quad (Front)
-			glVertex3f(-blockSize,-blockSize, blockSize);          // Bottom Left Of The Quad (Front)
-			glVertex3f( blockSize,-blockSize, blockSize);          // Bottom Right Of The Quad (Front)
-
-			glVertex3f( blockSize,-blockSize,-blockSize);          // Bottom Left Of The Quad (Back)
-			glVertex3f(-blockSize,-blockSize,-blockSize);          // Bottom Right Of The Quad (Back)
-			glVertex3f(-blockSize, blockSize,-blockSize);          // Top Right Of The Quad (Back)
-			glVertex3f( blockSize, blockSize,-blockSize);          // Top Left Of The Quad (Back)
-
-			glVertex3f(-blockSize, blockSize, blockSize);          // Top Right Of The Quad (Left)
-			glVertex3f(-blockSize, blockSize,-blockSize);          // Top Left Of The Quad (Left)
-			glVertex3f(-blockSize,-blockSize,-blockSize);          // Bottom Left Of The Quad (Left)
-			glVertex3f(-blockSize,-blockSize, blockSize);          // Bottom Right Of The Quad (Left)
-
-			glVertex3f( blockSize, blockSize,-blockSize);          // Top Right Of The Quad (Right)
-			glVertex3f( blockSize, blockSize, blockSize);          // Top Left Of The Quad (Right)
-			glVertex3f( blockSize,-blockSize, blockSize);          // Bottom Left Of The Quad (Right)
-			glVertex3f( blockSize,-blockSize,-blockSize);          // Bottom Right Of The Quad (Right)
-		glEnd();
-	glPopMatrix();
-}
-
-void renderCubes()
-{
-	/*
-	for(int x = 0; x < 32; x++)
-	{
-		for(int y = 0; y < 32; y++)
-		{
-			for(int z = 0; z < 32; z++)
-			{
-				glTranslatef((GLfloat)x * blockSize, (GLfloat)y * blockSize, (GLfloat)z * blockSize);
-				renderCube();				
-			}
-		}
-	}*/
-	glTranslatef(0,1,0);
-	renderCube();
-}
 // ------------------------------------------
 //					TEXT
 // ------------------------------------------
@@ -258,24 +176,24 @@ void processShrinkMenu(int option){
 void processColorMenu(int option){
 	switch(option){
 		case RED :
-			red = 1.0f;
-			green = 0.0f;
-			blue = 0.0f;
+			block.red = 1.0f;
+			block.green = 0.0f;
+			block.blue = 0.0f;
 			break;	
 		case GREEN :
-			red = 0.0f;
-			green = 1.0f;
-			blue = 0.0f;
+			block.red = 0.0f;
+			block.green = 1.0f;
+			block.blue = 0.0f;
 			break;
 		case BLUE :
-			red = 0.0f;
-			green = 0.0f;
-			blue = 1.0f;
+			block.red = 0.0f;
+			block.green = 0.0f;
+			block.blue = 1.0f;
 			break;	
 		case ORANGE :
-			red = 1.0f;
-			green = 0.5f;
-			blue = 0.5f;
+			block.red = 1.0f;
+			block.green = 0.55f;
+			block.blue = 0.0f;
 			break;
 	}
 }
@@ -311,15 +229,11 @@ void renderScene(void){
 	camera.UpdateCamera();
 
 	//Draw Ground
-	glColor3f(0.5f, 0.5f, 0.5f);
 	glBegin(GL_QUADS);
-		glVertex3f(-100.f, 0.0f, -100.0f);
-		glVertex3f(-100.f, 0.0f, 100.0f);
-		glVertex3f(100.f, 0.0f, 100.0f);
-		glVertex3f(100.f, 0.0f, -100.0f);
+		block.renderGround();
 	glEnd();
 
-	renderCubes();
+	block.renderCubes();
 
 	glutSwapBuffers();
 }
@@ -355,7 +269,7 @@ int main(int argc, char **argv) {
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowPosition(100,100);
 	glutInitWindowSize(1024,768);
-	glutCreateWindow("Lighthouse3D - GLUT Tutorial");
+	glutCreateWindow("Chrispy Tacos");
 	
 	camera = Camera();
 	
