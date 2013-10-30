@@ -32,7 +32,7 @@ const int DESIRED_FPS = 60;
 #define NORMAL 2
 
 //Popup Menu Identifiers
-int fillMenu, shrinkMenu, mainMenu, colorMenu;
+int fillMenu, mainMenu, colorMenu;
 
 //scale of snowman
 float scale = 1.0f;
@@ -54,56 +54,17 @@ void *font = GLUT_BITMAP_TIMES_ROMAN_24;
 //Orthographics
 int width = 1024, height = 768;
 
+// variables to compute frames per second
+int frame;
+long time, timebase;
+char s[50];
 
 /*TEST*/
 Camera camera;
 Block block;
 
 
-// ------------------------------------------
-//					TEXT
-// ------------------------------------------
-void renderBitmapString(float x, float y, float z, void *font, char *string){
-	char *c;
-	glRasterPos3f(x,y,z);
-	for(c = string; *c != '\0'; c++){
-		glutBitmapCharacter(font, *c);
-	}
-}
 
-void renderSpacedBitmapString(float x, float y, int spacing, void *font, char *string){
-	char *c;
-	float x1=x;
-
-	for(c = string; *c != '\0'; c++){
-		glRasterPos2f(x1, y);
-		glutBitmapCharacter(font, *c);
-		x1 = x1 + glutBitmapWidth(font, *c) + spacing;
-	}
-}
-
-void renderVerticalBitmapString(float x, float y, int bitmapHeight, void *font, char *string){
-	char *c;
-	int i;
-
-	for(c = string, i = 0; *c != '\0'; i++, c++){
-		glRasterPos2f(x, y+bitmapHeight * i);
-		glutBitmapCharacter(font, *c);
-	}
-}
-
-void renderStrokeFontString(float x, float y, float z, void *font, char *string){
-	char *c;
-	glPushMatrix();
-	
-	glTranslatef(x,y,z);
-
-	for(c = string; *c != '\0'; c++){
-		glutStrokeCharacter(GLUT_STROKE_ROMAN, *c);
-	}
-
-	glPopMatrix();
-}
 
 // ------------------------------------------
 //				KEYBOARD
@@ -114,31 +75,42 @@ void processNormalKeys(unsigned char key, int x, int y){
 		glutDestroyMenu(mainMenu);
 		glutDestroyMenu(fillMenu);
 		glutDestroyMenu(colorMenu);
-		glutDestroyMenu(shrinkMenu);
 		exit(0);
 		break;
-	case 's':
-		if(!menuFlag)
-			glutChangeToSubMenu(2, "Shrink", shrinkMenu);
-		break;
-	case 'c':
-		if(!menuFlag)
-			glutChangeToSubMenu(2, "Color", colorMenu);
-		break;
-	case 'f':
-		if(!menuFlag)
-			glutChangeToSubMenu(3, "Fill", fillMenu);
-		break;
 	}
-	if(key == 27)
-		exit(0);	
+}
+
+
+
+
+
+void changeSize(int w, int h)
+{
+	camera.changeSize(w,h);
+}
+
+void mouseButton(int button, int state, int x, int y)
+{
+	camera.mouseButton(button, state, x, y);
+}
+void mouseMove(int x, int y)
+{
+	camera.mouseMove(x, y);
+}
+void pressKey(int key, int xx, int yy)
+{
+	camera.pressKey(key, xx, yy);
+}
+void releaseKey(int key, int x, int y)
+{
+	camera.releaseKey(key, x, y);
 }
 
 // ------------------------------------------
 //					MENUS
 // ------------------------------------------
 void processMenuStatus(int status, int x, int y){
-	if(status == GLUT_MENU_IN_USE){
+	if (status == GLUT_MENU_IN_USE){
 		menuFlag = 1;
 	}
 	else{
@@ -152,56 +124,42 @@ void processMainMenu(int option){
 }
 
 void processFillMenu(int option){
-	switch(option){
-		case FILL:
-			glPolygonMode(GL_FRONT,GL_FILL);
-			break;
-		case LINE:
-			glPolygonMode(GL_FRONT, GL_LINE);
-			break;
-	}
-}
-
-void processShrinkMenu(int option){
-	switch(option){
-		case SHRINK:
-			scale = 0.5f;
-			break;
-		case NORMAL:
-			scale = 1.0f;
-			break;
+	switch (option){
+	case FILL:
+		glPolygonMode(GL_FRONT, GL_FILL);
+		break;
+	case LINE:
+		glPolygonMode(GL_FRONT, GL_LINE);
+		break;
 	}
 }
 
 void processColorMenu(int option){
-	switch(option){
-		case RED :
-			block.red = 1.0f;
-			block.green = 0.0f;
-			block.blue = 0.0f;
-			break;	
-		case GREEN :
-			block.red = 0.0f;
-			block.green = 1.0f;
-			block.blue = 0.0f;
-			break;
-		case BLUE :
-			block.red = 0.0f;
-			block.green = 0.0f;
-			block.blue = 1.0f;
-			break;	
-		case ORANGE :
-			block.red = 1.0f;
-			block.green = 0.55f;
-			block.blue = 0.0f;
-			break;
+	switch (option){
+	case RED:
+		block.red = 1.0f;
+		block.green = 0.0f;
+		block.blue = 0.0f;
+		break;
+	case GREEN:
+		block.red = 0.0f;
+		block.green = 1.0f;
+		block.blue = 0.0f;
+		break;
+	case BLUE:
+		block.red = 0.0f;
+		block.green = 0.0f;
+		block.blue = 1.0f;
+		break;
+	case ORANGE:
+		block.red = 1.0f;
+		block.green = 0.55f;
+		block.blue = 0.0f;
+		break;
 	}
 }
 
 void createPopupMenus(){
-	shrinkMenu = glutCreateMenu(processShrinkMenu);
-	glutAddMenuEntry("SHRINK", SHRINK);
-	glutAddMenuEntry("NORMAL", NORMAL);
 
 	fillMenu = glutCreateMenu(processFillMenu);
 	glutAddMenuEntry("FILL", FILL);
@@ -214,52 +172,117 @@ void createPopupMenus(){
 	glutAddMenuEntry("ORANGE", ORANGE);
 
 	mainMenu = glutCreateMenu(processMainMenu);
-	glutAddSubMenu("Scale Mode", shrinkMenu);
 	glutAddSubMenu("Polygon Mode", fillMenu);
 	glutAddSubMenu("Color", colorMenu);
 	//attach the menu to the right button
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
-	
+
 	//this will allow us to know if the menu is active
 	glutMenuStatusFunc(processMenuStatus);
 }
+// ------------------------------------------
+//					TEXT
+// ------------------------------------------
+void renderBitmapString(float x, float y, float z, void *font, char *string){
+	char *c;
+	glRasterPos3f(x, y, z);
+	for (c = string; *c != '\0'; c++){
+		glutBitmapCharacter(font, *c);
+	}
+}
+
+void renderSpacedBitmapString(float x, float y, int spacing, void *font, char *string){
+	char *c;
+	float x1 = x;
+
+	for (c = string; *c != '\0'; c++){
+		glRasterPos2f(x1, y);
+		glutBitmapCharacter(font, *c);
+		x1 = x1 + glutBitmapWidth(font, *c) + spacing;
+	}
+}
+
+void renderVerticalBitmapString(float x, float y, int bitmapHeight, void *font, char *string){
+	char *c;
+	int i;
+
+	for (c = string, i = 0; *c != '\0'; i++, c++){
+		glRasterPos2f(x, y + bitmapHeight * i);
+		glutBitmapCharacter(font, *c);
+	}
+}
+
+void renderStrokeFontString(float x, float y, float z, void *font, char *string){
+	char *c;
+	glPushMatrix();
+
+	glTranslatef(x, y, z);
+
+	for (c = string; *c != '\0'; c++){
+		glutStrokeCharacter(GLUT_STROKE_ROMAN, *c);
+	}
+
+	glPopMatrix();
+}
+
+void setOrthographicProjection(){
+	//switch to projection mode
+	glMatrixMode(GL_PROJECTION);
+
+	//save previous matrix which contains
+	//the settings for the perspective projection
+	glPushMatrix();
+
+	//reset matrix
+	glLoadIdentity();
+
+	//set 2D orthographics projection
+	gluOrtho2D(0, width, height, 0);
+
+	//switch back to modelview mode
+	glMatrixMode(GL_MODELVIEW);
+}
+
+void restorePerspectiveProjection(){
+	glMatrixMode(GL_PROJECTION);
+
+	glPopMatrix();
+
+	glMatrixMode(GL_MODELVIEW);
+}
 
 void renderScene(void){
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	camera.UpdateCamera();
 
 	//Draw Ground
 	glBegin(GL_QUADS);
-		block.renderGround();
+	block.renderGround();
 	glEnd();
 
 	block.renderCubes();
 
+	frame++;
+
+	time = glutGet(GLUT_ELAPSED_TIME);
+	if (time - timebase > 1000) {
+		sprintf(s, "FPS:%4.2f",
+			frame*1000.0 / (time - timebase));
+		timebase = time;
+		frame = 0;
+	}
+
+	// Code to display a string (fps) with bitmap fonts
+	setOrthographicProjection();
+
+	glPushMatrix();
+	glLoadIdentity();
+	renderBitmapString(5, 30, 0, GLUT_BITMAP_HELVETICA_18, s);
+	glPopMatrix();
+
+	restorePerspectiveProjection();
+
 	glutSwapBuffers();
-}
-
-void changeSize(int w, int h)
-{
-	camera.changeSize(w,h);
-}
-
-void mouseButton(int button, int state, int x, int y)
-{
-	camera.mouseButton(button, state, x, y);
-}
-
-void mouseMove(int x, int y)
-{
-	camera.mouseMove(x, y);
-}
-
-void pressKey(int key, int xx, int yy)
-{
-	camera.pressKey(key, xx, yy);
-}
-void releaseKey(int key, int x, int y)
-{
-	camera.releaseKey(key, x, y);
 }
 
 int main(int argc, char **argv) {
@@ -267,12 +290,12 @@ int main(int argc, char **argv) {
 	// init GLUT and create Window
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
-	glutInitWindowPosition(100,100);
-	glutInitWindowSize(1024,768);
+	glutInitWindowPosition(100, 100);
+	glutInitWindowSize(1024, 768);
 	glutCreateWindow("Chrispy Tacos");
-	
+
 	camera = Camera();
-	
+
 	// register callbacks
 	glutDisplayFunc(renderScene);
 
@@ -298,9 +321,9 @@ int main(int argc, char **argv) {
 
 	//init Menus
 	createPopupMenus();
-	
+
 	// enter GLUT event processing cycle
 	glutMainLoop();
-	
+
 	return 1;
 }

@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include <iostream>
 
 Camera::Camera(void)
 {
@@ -10,7 +11,8 @@ Camera::Camera(void)
 	x=0.0f, z=5.0f;
 
 	deltaAngle = 0.0f;
-	deltaMove = 0;
+	deltaMoveX = 0.0f;
+	deltaMovez = 0.0f;
 	xOrigin = -1;
 
 
@@ -25,10 +27,12 @@ Camera::~Camera(void)
 
 void Camera::UpdateCamera()
 {
-	if(deltaMove)
-		computePos(deltaMove);
-	if(deltaAngle)
-		computeDir(deltaAngle);
+	if(deltaMoveX)
+		computePosX(deltaMoveX);
+	if (deltaMovez)
+		computePosz(deltaMovez);
+	//if(deltaAngle)
+	//	computeDir(deltaAngle);
 
 	glLoadIdentity();
 
@@ -94,35 +98,6 @@ void Camera:: changeSize(int w, int h){
 	glMatrixMode(GL_MODELVIEW);
 }
 
-/*
-
-void setOrthographicProjection(){
-	//switch to projection mode
-	glMatrixMode(GL_PROJECTION);
-
-	//save previous matrix which contains
-	//the settings for the perspective projection
-	glPushMatrix();
-
-	//reset matrix
-	glLoadIdentity();
-
-	//set 2D orthographics projection
-	gluOrtho2D(0, width, height, 0);
-
-	//switch back to modelview mode
-	glMatrixMode(GL_MODELVIEW);
-}
-
-void restorePerspectiveProjection(){
-	glMatrixMode(GL_PROJECTION);
-
-	glPopMatrix();
-
-	glMatrixMode(GL_MODELVIEW);
-}
-
-*/
 
 /*
 *
@@ -150,7 +125,7 @@ void Camera:: mouseMove(int x, int y){
 	//this will only be true when the left button is down
 	if(xOrigin >= 0){
 		//update deltaAngle
-		deltaAngle = ((x - xOrigin) * 0.001f)/8;
+		deltaAngle = ((x - xOrigin) * 0.001f);
 
 		//update camera's direction
 		lx = sin(angle + deltaAngle);
@@ -159,33 +134,47 @@ void Camera:: mouseMove(int x, int y){
 }
 
 //Keyboard
-void Camera:: computePos(float deltaMove){
-	x += deltaMove * lx * 0.1f;
-	z += deltaMove * lz * 0.1f;
+//compute position when walking foward and back
+void Camera:: computePosX(float deltaMoveX){
+	x += deltaMoveX * lx * 0.1f;
+	z += deltaMoveX * lz * 0.1f;
 }
-
-void Camera:: computeDir(float deltaAngle){
-	angle += deltaAngle;
-	lx = sin(angle);
-	lz = -cos(angle);
+void Camera::computePosz(float deltaMovez){
+// compute the position when straifing
 }
 
 void Camera:: pressKey(int key, int xx, int yy){
 	switch(key){
 		case GLUT_KEY_UP: 
-			deltaMove = 0.5f; 
+			deltaMoveX = 0.5f; 
 			break;
 		case GLUT_KEY_DOWN: 
-			deltaMove = -0.5f;
+			deltaMoveX = -0.5f;
 			break;
+		case GLUT_KEY_LEFT: 
+			deltaMovez = 0.5f;
+			break;
+		case GLUT_KEY_RIGHT: 
+			deltaMovez = -0.5f;
+			break;
+
 	}
 }
 
 void Camera:: releaseKey(int key, int x, int y){
 	switch(key){
-		case GLUT_KEY_UP:
-		case GLUT_KEY_DOWN: 
-			deltaMove = 0.0f; 
-			break;
+	case GLUT_KEY_UP:
+		deltaMoveX = 0.0f;
+		break;
+	case GLUT_KEY_DOWN: 
+		deltaMoveX = 0; 
+		break;
+	case GLUT_KEY_LEFT:
+		deltaMovez = 0.0f;
+		break;
+	case GLUT_KEY_RIGHT:
+		deltaMovez = 0.0f;
+		break;
 	}
 }
+

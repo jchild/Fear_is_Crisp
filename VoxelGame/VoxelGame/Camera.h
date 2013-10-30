@@ -1,5 +1,7 @@
 #pragma once
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <iostream>
 #include <math.h>
 
 #ifdef __APPLE__
@@ -7,6 +9,8 @@
 #else
 #include <GL/glut.h>
 #endif
+
+using namespace std;
 
 class Camera
 {
@@ -24,6 +28,7 @@ public:
 
 	void pressKey(int key, int xx, int yy);
 	void releaseKey(int key, int x, int y);
+
 private:
 	int width;
 	int height;
@@ -36,11 +41,12 @@ private:
 	float x, z;
 
 	float deltaAngle;
-	float deltaMove;
+	float deltaMoveX;
+	float deltaMovez;
 	int xOrigin;
 
 
-	void computePos(float deltaMove);
-	void computeDir(float deltaAngle);
+	void computePosX(float deltaMoveX);
+	void computePosz(float deltaMovez);
 };
 
